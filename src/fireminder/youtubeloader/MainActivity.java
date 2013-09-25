@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,7 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.youtube.player.YouTubeStandalonePlayer;
 
 import fireminder.youtubeloader.ui.VideoListViewAdapter;
 import fireminder.youtubeloader.valueobjects.YoutubeVideo;
@@ -39,6 +41,9 @@ public class MainActivity extends ListActivity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
 					long id) {
 				Toast.makeText(getApplicationContext(), mVideos.get(position).getLink(), Toast.LENGTH_LONG).show();
+				Intent intent = YouTubeStandalonePlayer.createVideoIntent(MainActivity.this, "AIzaSyA6pTR_lMnCqwKpJXTADsRjwRQhrQOA8T8", mVideos.get(position).getKey());
+				Log.e("TAG", mVideos.get(position).getKey());
+				startActivity(intent);
 			}
 		});
 

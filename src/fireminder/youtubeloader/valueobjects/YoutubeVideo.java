@@ -38,6 +38,9 @@ public class YoutubeVideo {
 	public void setViewCount(int viewCount) {
 		this.viewCount = viewCount;
 	}
+	public String getKey(){
+		return link.subSequence(link.indexOf("?")+3, link.indexOf("&")).toString();
+	}
 	
 	
 	
