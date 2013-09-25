@@ -24,7 +24,6 @@ import fireminder.youtubeloader.valueobjects.YoutubeVideo;
 
 public class VideoListViewAdapter extends ArrayAdapter<YoutubeVideo> {
 
-	Bitmap mThumbnailBitmap;
 	Context mContext;
 	YoutubeVideo[] mObjects;
 	ImageLoader mImageLoader;
