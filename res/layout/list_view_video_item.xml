@@ -4,10 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="horizontal" >
 
+    <!-- Assumption: all thumbnails wil be 90x120 -->
     <ImageView
         android:id="@+id/list_view_video_thumbnail"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="120dp"
+        android:layout_height="90dp"
         android:background="@color/black" />
 
     <LinearLayout

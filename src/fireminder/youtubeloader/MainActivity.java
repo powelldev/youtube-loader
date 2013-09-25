@@ -10,6 +10,10 @@ import android.app.ListActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
 
 import com.android.volley.Request.Method;
 import com.android.volley.Response.ErrorListener;
@@ -29,8 +33,17 @@ public class MainActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		getListView().setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+					long id) {
+				Toast.makeText(getApplicationContext(), mVideos.get(position).getLink(), Toast.LENGTH_LONG).show();
+			}
+		});
+
 		StringRequest request = new StringRequest( Method.GET,
-				"http://gdata.youtube.com/feeds/api/videos?alt=json",
+				"http://gdata.youtube.com/feeds/api/videos?alt=json&max-results=50",
 				 new Listener<String>() {
 
 					@Override
@@ -43,10 +56,11 @@ public class MainActivity extends ListActivity {
 							JSONArray entries = feed.getJSONArray("entry");
 							for(int i = 0; i < entries.length(); i++){
 								JSONObject entry = entries.getJSONObject(i);
-								Log.e("Link", entry.getJSONArray("link").getJSONObject(0).getString("href"));
-								Log.e("Title", entry.getJSONObject("title").getString("$t"));
-								Log.e("thumbnail", entry.getJSONObject("media$group").getJSONArray("media$thumbnail").getJSONObject(1).getString("url"));
-								Log.e("viewcount", entry.getJSONObject("yt$statistics").getString("viewCount"));
+								String link =  entry.getJSONArray("link").getJSONObject(0).getString("href");
+								String title =  entry.getJSONObject("title").getString("$t");
+								String thumbnail =  entry.getJSONObject("media$group").getJSONArray("media$thumbnail").getJSONObject(2).getString("url");
+								int viewCount = Integer.parseInt(entry.getJSONObject("yt$statistics").getString("viewCount"));
+								mVideos.add(new YoutubeVideo(title, link, viewCount, thumbnail));
 							}
 
 
@@ -73,7 +87,6 @@ public class MainActivity extends ListActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 
-			mVideos.add(new YoutubeVideo("title", "link", 10, "link"));
 			array = new YoutubeVideo[mVideos.size()];
 			for (int i = 0; i < mVideos.size(); i++) {
 				array[i] = mVideos.get(i);
