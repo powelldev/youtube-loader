@@ -79,16 +79,21 @@ public class MainActivity extends ListActivity implements OnScrollListener {
 	}
 
 	/**
-	 * Queries Youtube's API for next set of videos. 
-	 * Calls an AsyncTask to load these new values into the ListView.
-	 * @param start start-index of results
-	 * @param stop max-results
+	 * Queries Youtube's API for next set of videos. Calls an AsyncTask to load
+	 * these new values into the ListView.
+	 * 
+	 * @param start
+	 *            start-index of results
+	 * @param stop
+	 *            max-results
 	 */
 	public void performYoutubeApiQuery(int start, int stop) {
-		if(loadingMore){
+		if (loadingMore) {
 			return;
 		}
 		loadingMore = true;
+		Toast.makeText(getApplicationContext(), "Loading more videos",
+				Toast.LENGTH_SHORT).show();
 		String url = YOUTUBE_URL;
 		// if first run
 		if (start == 0) {
@@ -179,11 +184,11 @@ public class MainActivity extends ListActivity implements OnScrollListener {
 		// Only load if we're near the end of a list.
 		if (firstVisibleItem + visibleItemCount >= totalItemCount
 				&& totalItemCount > 10) {
-			Toast.makeText(getApplicationContext(), "Loading more videos", Toast.LENGTH_SHORT).show();
 			performYoutubeApiQuery(totalItemCount, RESULT_INCREMENTS);
 		}
 	}
 
 	@Override
-	public void onScrollStateChanged(AbsListView arg0, int arg1) {}
+	public void onScrollStateChanged(AbsListView arg0, int arg1) {
+	}
 }
