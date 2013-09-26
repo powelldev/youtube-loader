@@ -1,6 +1,8 @@
 package fireminder.youtubeloader.ui;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import android.content.Context;
@@ -9,7 +11,7 @@ import android.support.v4.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,19 +24,22 @@ import com.android.volley.toolbox.Volley;
 import fireminder.youtubeloader.R;
 import fireminder.youtubeloader.valueobjects.YoutubeVideo;
 
-public class VideoListViewAdapter extends ArrayAdapter<YoutubeVideo> {
+public class VideoListViewAdapter extends BaseAdapter{
 
 	Context mContext;
 	YoutubeVideo[] mObjects;
 	ImageLoader mImageLoader;
 
 	public VideoListViewAdapter(Context context, int resource, YoutubeVideo[] objects) {
-		super(context, resource, objects);
 
 		mImageLoader = new ImageLoader(Volley.newRequestQueue(context), new BitmapImageCache(10));
 		mContext = context;
 		mObjects = objects;
 
+	}
+	
+	public void setArray(YoutubeVideo[] moreObjects){
+		mObjects = moreObjects;
 	}
 
 	@Override
@@ -90,6 +95,22 @@ public class VideoListViewAdapter extends ArrayAdapter<YoutubeVideo> {
 			put(arg0, arg1);
 		}
 		
+	}
+
+	@Override
+	public int getCount() {
+		return mObjects.length;
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return mObjects[position];
+	}
+
+	@Override
+	public long getItemId(int position) {
+		// TODO Auto-generated method stub
+		return position;
 	}
 	
 

@@ -34,7 +34,12 @@ import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import fireminder.youtubeloader.ui.VideoListViewAdapter;
 import fireminder.youtubeloader.valueobjects.YoutubeVideo;
 
-public class MainActivity extends ListActivity implements OnScrollListener{
+public class MainActivity extends ListActivity implements OnScrollListener {
+
+	/** prevent multiple queries for the same data from being launched */
+	boolean loadingMore = false;
+
+	VideoListViewAdapter mAdapter;
 
 	/** video array for list view adapter */
 	YoutubeVideo[] array;
@@ -42,7 +47,9 @@ public class MainActivity extends ListActivity implements OnScrollListener{
 	/** List to store videos parsed from JSON */
 	ArrayList<YoutubeVideo> mVideos = new ArrayList<YoutubeVideo>();
 
-	static final String YOUTUBE_URL = "http://gdata.youtube.com/feeds/api/videos?alt=json&max-results=50";
+	static final String YOUTUBE_URL = "http://gdata.youtube.com/feeds/api/videos?alt=json";
+
+	static final int RESULT_INCREMENTS = 50;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +57,11 @@ public class MainActivity extends ListActivity implements OnScrollListener{
 		setContentView(R.layout.activity_main);
 		getListView().setOnScrollListener(this);
 
-		/** Query site for videos */
-		performYoutubeApiQuery(0, 50);
+		/**
+		 * Initial query for videos, subsequent ones will be handled by the
+		 * ScrollListener
+		 */
+		performYoutubeApiQuery(0, RESULT_INCREMENTS);
 
 		/** Setup click event */
 		getListView().setOnItemClickListener(new OnItemClickListener() {
@@ -65,15 +75,24 @@ public class MainActivity extends ListActivity implements OnScrollListener{
 				startActivity(intent);
 			}
 		});
-		
-		
 
 	}
 
-	public void performYoutubeApiQuery(int start, int stop){
-		String url = "http://gdata.youtube.com/feeds/api/videos?alt=json";
-		if(start == 0){
-				url = url + "&max-results=50";
+	/**
+	 * Queries Youtube's API for next set of videos. 
+	 * Calls an AsyncTask to load these new values into the ListView.
+	 * @param start start-index of results
+	 * @param stop max-results
+	 */
+	public void performYoutubeApiQuery(int start, int stop) {
+		if(loadingMore){
+			return;
+		}
+		loadingMore = true;
+		String url = YOUTUBE_URL;
+		// if first run
+		if (start == 0) {
+			url = url + "&max-results=" + RESULT_INCREMENTS;
 		} else {
 			url = url + "&start-index=" + start + "&max-results=" + stop;
 		}
@@ -99,16 +118,14 @@ public class MainActivity extends ListActivity implements OnScrollListener{
 								int viewCount = Integer.parseInt(entry
 										.getJSONObject("yt$statistics")
 										.getString("viewCount"));
-								mVideos.add(
-										new YoutubeVideo(title, 
-										link,
-										viewCount, 
-										thumbnail));
+								mVideos.add(new YoutubeVideo(title, link,
+										viewCount, thumbnail));
 							}
 
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
+						loadingMore = false;
 						new BackgroundLoaderAsyncTask().execute();
 					}
 
@@ -124,8 +141,8 @@ public class MainActivity extends ListActivity implements OnScrollListener{
 
 		Volley.newRequestQueue(getApplicationContext()).add(request);
 	}
-	/** Load videos into list asynchronously */
 
+	/** Load videos into list asynchronously */
 	class BackgroundLoaderAsyncTask extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... params) {
@@ -140,23 +157,33 @@ public class MainActivity extends ListActivity implements OnScrollListener{
 
 		@Override
 		protected void onPostExecute(Void result) {
-			setListAdapter(new VideoListViewAdapter(getApplicationContext(),
-					R.layout.list_view_video_item, array));
+			if (array.length > RESULT_INCREMENTS) {
+				// not first run, update adapter
+				mAdapter.setArray(array);
+				mAdapter.notifyDataSetChanged();
+			} else {
+				// first run, set List Adapter
+				mAdapter = new VideoListViewAdapter(getApplicationContext(),
+						R.layout.list_view_video_item, array);
+				setListAdapter(mAdapter);
+			}
 		}
 
 	}
 
+	/** Setup infinite view */
 	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
 
-		if(firstVisibleItem + visibleItemCount >= totalItemCount && totalItemCount > 10) {
-			performYoutubeApiQuery(totalItemCount, 50);
+		// Only load if we're near the end of a list.
+		if (firstVisibleItem + visibleItemCount >= totalItemCount
+				&& totalItemCount > 10) {
+			Toast.makeText(getApplicationContext(), "Loading more videos", Toast.LENGTH_SHORT).show();
+			performYoutubeApiQuery(totalItemCount, RESULT_INCREMENTS);
 		}
 	}
 
 	@Override
-	public void onScrollStateChanged(AbsListView arg0, int arg1) {
-		
-		
-	}
+	public void onScrollStateChanged(AbsListView arg0, int arg1) {}
 }
