@@ -70,7 +70,7 @@ public class MainActivity extends ListActivity implements OnScrollListener {
 					int position, long id) {
 				Intent intent = YouTubeStandalonePlayer.createVideoIntent(
 						MainActivity.this,
-						"AIzaSyA6pTR_lMnCqwKpJXTADsRjwRQhrQOA8T8",
+						DeveloperKey.KEY,
 						mVideos.get(position).getKey());
 				startActivity(intent);
 			}
